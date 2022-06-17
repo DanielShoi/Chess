@@ -149,10 +149,9 @@ const rockMove = (position, currentPosition, type) => {
         if (!whiteTurn) {
             myColor = 'Black';
         }
-      if(moveStraight(position, currentPosition, type,myColor,x)) {
-        console.log('dasdasdasd');
-        return true;
-      }
+        if (moveStraight(position, currentPosition, type, myColor, x)) {
+            return true;
+        }
     }
 
 }
@@ -356,7 +355,7 @@ const movePieceWhite = (position, currentPosition, square, currentSquare, pieceW
     }
 }
 
-const moveStraight=(position, currentPosition, type,color,x)=>{
+const moveStraight = (position, currentPosition, type, color, x) => {
     pieceCanMove = true;
     const rockWhite = document.getElementById(type + color + currentPosition);
     if (rockWhite != null) {
@@ -427,7 +426,7 @@ const moveStraight=(position, currentPosition, type,color,x)=>{
             }
         }
         if (currentPosition % 8 == 0) {
-            lastSquareRight = currentPosition + 7;
+            lastSquareRight = currentPosition;
         }
         for (let index = parseInt(currentPosition) + 1; index <= lastSquareRight; index++) {
             types.forEach(typeOf => {
