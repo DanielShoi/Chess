@@ -55,9 +55,7 @@ for (let index = 9; index <= 16; index++) {
     pawnBlack.className = 'pawn-Black';
     square.appendChild(pawnBlack);
 }
-const initMe = () => {
 
-}
 const rockSquare1 = document.getElementById(57);
 const rockWhite1 = document.createElement('div');
 rockWhite1.id = 'rockWhite' + 57;
@@ -81,6 +79,30 @@ const rockBlack2 = document.createElement('div');
 rockBlack2.id = 'rockBlack' + 8;
 rockBlack2.className = 'rock-black';
 rockSquare4.appendChild(rockBlack2);
+
+const bishopSquare1 = document.getElementById(59);
+const bishopWhite1 = document.createElement('div');
+bishopWhite1.id = 'bishopWhite' + 59;
+bishopWhite1.className = 'bishop-White';
+bishopSquare1.appendChild(bishopWhite1);
+
+const bishopSquare2 = document.getElementById(62);
+const bishopWhite2 = document.createElement('div');
+bishopWhite2.id = 'bishopWhite' + 62;
+bishopWhite2.className = 'bishop-White';
+bishopSquare2.appendChild(bishopWhite2);
+
+const bishopSquare3 = document.getElementById(3);
+const bishopBlack1 = document.createElement('div');
+bishopBlack1.id = 'bishopBlack' + 3;
+bishopBlack1.className = 'bishop-black';
+bishopSquare3.appendChild(bishopBlack1);
+
+const bishopSquare4 = document.getElementById(6);
+const bishopBlack2 = document.createElement('div');
+bishopBlack2.id = 'bishopBlack' + 6;
+bishopBlack2.className = 'bishop-black';
+bishopSquare4.appendChild(bishopBlack2);
 
 const squareClick = (position) => {
     console.log(position);
@@ -122,22 +144,26 @@ const moveMe = (position, currentPosition, type) => {
     thisSquare = square;
     const currentSquare = document.getElementById(currentPosition);
     if (whiteTurn) {
+        checkTypeBlack(position);
+        const otherTypeBlack = document.getElementById(chosenTypeBlack + 'Black' + position);
         const pieceWhite = document.getElementById(type + 'White' + currentPosition);
         if (position == currentPosition || pieceWhite == null) {
             currentSquare.className = previousSquareClass;
             move = !move;
             return;
         } else {
-            movePieceWhite(position, currentPosition, square, currentSquare, pieceWhite, type);
+            movePieceWhite(position, currentPosition, square, currentSquare, pieceWhite, type, otherTypeBlack);
         }
     } else {
+        checkTypeWhite(position);
+        const otherTypeWhite = document.getElementById(chosenTypeWhite + 'White' + position);
         const pieceBlack = document.getElementById(type + 'Black' + currentPosition);
         if (position == currentPosition || pieceBlack == null) {
             currentSquare.className = previousSquareClass;
             move = !move;
             return;
         } else {
-            movePieceBlack(position, currentPosition, square, currentSquare, pieceBlack, type);
+            movePieceBlack(position, currentPosition, square, currentSquare, pieceBlack, type, otherTypeWhite);
         }
     }
 }
@@ -150,6 +176,20 @@ const rockMove = (position, currentPosition, type) => {
             myColor = 'Black';
         }
         if (moveStraight(position, currentPosition, type, myColor, x)) {
+            return true;
+        }
+    }
+
+}
+
+const bishopMove = (position, currentPosition, type) => {
+    if (type == 'bishop') {
+        let x = false;
+        let myColor = 'White'
+        if (!whiteTurn) {
+            myColor = 'Black';
+        }
+        if (moveDiagonally(position, currentPosition, type, myColor, x)) {
             return true;
         }
     }
@@ -246,6 +286,7 @@ const checkTypeWhite = (position) => {
         if (pieceWhite != null) {
             chosenTypeWhite = typeOf;
             chosenPieceWhite = pieceWhite;
+            return typeOf;
         }
     });
 }
@@ -261,8 +302,9 @@ const checkTypeBlack = (position) => {
     });
 }
 
-const movePieceBlack = (position, currentPosition, square, currentSquare, pieceBlack, type) => {
-    if (pawnTake(position, currentPosition)) {
+const movePieceBlack = (position, currentPosition, square, currentSquare, pieceBlack, type, otherPiece) => {
+    console.log(takePiece(position, currentPosition, type));
+    if (pawnTake(position, currentPosition, type)) {
         if (pawnSpecialWhite && type == 'pawn') {
             currentPosition++;
             const pawnWhite1 = document.getElementById('pawnWhite' + currentPosition);
@@ -284,7 +326,6 @@ const movePieceBlack = (position, currentPosition, square, currentSquare, pieceB
                 return;
             }
         }
-        const pieceWhite = document.getElementById(type + 'White' + position);
         thisSquareClass = square.className;
         currentSquare.className = previousSquareClass;
         currentSquare.removeChild(pieceBlack);
@@ -293,10 +334,24 @@ const movePieceBlack = (position, currentPosition, square, currentSquare, pieceB
         whiteTurn = !whiteTurn;
         move = !move;
         firstTurn = false;
-        square.removeChild(pieceWhite);
+        square.removeChild(otherPiece);
         pawnSpecialWhite = false;
     } else if (pawnMove(position, currentPosition, type) ||
-        rockMove(position, currentPosition, type)) {
+        rockMove(position, currentPosition, type) ||
+        bishopMove(position, currentPosition, type)) {
+        if (takePiece(position, currentPosition, type)) {
+            thisSquareClass = square.className;
+            currentSquare.className = previousSquareClass;
+            currentSquare.removeChild(pieceBlack);
+            square.appendChild(pieceBlack);
+            pieceBlack.id = type + 'Black' + position;
+            whiteTurn = !whiteTurn;
+            move = !move;
+            firstTurn = false;
+            square.removeChild(otherPiece);
+            pawnSpecialWhite = false;
+            return;
+        }
         thisSquareClass = square.className;
         currentSquare.className = previousSquareClass;
         currentSquare.removeChild(pieceBlack);
@@ -307,7 +362,8 @@ const movePieceBlack = (position, currentPosition, square, currentSquare, pieceB
         pawnSpecialWhite = false;
     }
 }
-const movePieceWhite = (position, currentPosition, square, currentSquare, pieceWhite, type) => {
+const movePieceWhite = (position, currentPosition, square, currentSquare, pieceWhite, type, otherPiece) => {
+
     if (pawnTake(position, currentPosition)) {
         if (pawnSpecialBlack && type == 'pawn') {
             currentPosition++;
@@ -330,7 +386,6 @@ const movePieceWhite = (position, currentPosition, square, currentSquare, pieceW
                 return;
             }
         }
-        const pieceBlack = document.getElementById(type + 'Black' + position);
         thisSquareClass = square.className;
         currentSquare.className = previousSquareClass;
         currentSquare.removeChild(pieceWhite);
@@ -339,10 +394,25 @@ const movePieceWhite = (position, currentPosition, square, currentSquare, pieceW
         whiteTurn = !whiteTurn;
         move = !move;
         firstTurn = false;
-        square.removeChild(pieceBlack);
+        square.removeChild(otherPiece);
         pawnSpecialBlack = false;
+
     } else if (pawnMove(position, currentPosition, type) ||
-        rockMove(position, currentPosition, type)) {
+        rockMove(position, currentPosition, type) ||
+        bishopMove(position, currentPosition, type)) {
+        if (takePiece(position, currentPosition, type)) {
+            thisSquareClass = square.className;
+            currentSquare.className = previousSquareClass;
+            currentSquare.removeChild(pieceWhite);
+            square.appendChild(pieceWhite);
+            pieceWhite.id = type + 'White' + position;
+            whiteTurn = !whiteTurn;
+            move = !move;
+            firstTurn = false;
+            square.removeChild(otherPiece);
+            pawnSpecialBlack = false;
+            return;
+        }
         thisSquareClass = square.className;
         currentSquare.className = previousSquareClass;
         currentSquare.removeChild(pieceWhite);
@@ -357,93 +427,229 @@ const movePieceWhite = (position, currentPosition, square, currentSquare, pieceW
 
 const moveStraight = (position, currentPosition, type, color, x) => {
     pieceCanMove = true;
-    const rockWhite = document.getElementById(type + color + currentPosition);
-    if (rockWhite != null) {
-        for (let index = currentPosition - 8; index >= position; index -= 8) {
-            types.forEach(typeOf => {
-                const pWhite = document.getElementById(typeOf + color + index);
-                if (pWhite != null) {
-                    pieceCanMove = false;
-                    return;
+    if (type == 'rock' || type == 'queen') {
+        const straightPiece = document.getElementById(type + color + currentPosition);
+        if (straightPiece != null) {
+            for (let index = currentPosition - 8; index >= position; index -= 8) {
+                types.forEach(typeOf => {
+                    const pWhite = document.getElementById(typeOf + color + index);
+                    if (pWhite != null) {
+                        pieceCanMove = false;
+                        return;
+                    }
+                });
+                if (pieceCanMove && position == index) {
+                    x = true;
+                    break;
                 }
-            });
-            if (pieceCanMove && position == index) {
-                x = true;
-                break;
             }
-        }
-        if (x) {
-            return true;
-        }
-        pieceCanMove = true;
-        for (let index = parseInt(currentPosition) + 8; index <= position; index += 8) {
-            types.forEach(typeOf => {
-                const pWhite = document.getElementById(typeOf + color + index);
-                if (pWhite != null) {
-                    pieceCanMove = false;
-                    return;
+            if (x) {
+                return true;
+            }
+            pieceCanMove = true;
+            for (let index = parseInt(currentPosition) + 8; index <= position; index += 8) {
+                types.forEach(typeOf => {
+                    const pWhite = document.getElementById(typeOf + color + index);
+                    if (pWhite != null) {
+                        pieceCanMove = false;
+                        return;
+                    }
+                });
+                if (pieceCanMove && position == index) {
+                    x = true;
+                    break;
                 }
-            });
-            if (pieceCanMove && position == index) {
-                x = true;
-                break;
             }
-        }
-        if (x) {
-            return true;
-        }
-        pieceCanMove = true;
-        let lastSquareLeft = 0;
-        for (let index = currentPosition; index >= currentPosition - 7; index--) {
-            if (index % 8 == 0) {
-                lastSquareLeft = index;
+            if (x) {
+                return true;
             }
-        }
-        if (currentPosition % 8 == 0) {
-            lastSquareLeft = currentPosition - 7;
-        }
-        for (let index = currentPosition - 1; index >= lastSquareLeft; index--) {
-            types.forEach(typeOf => {
-                const pWhite = document.getElementById(typeOf + color + index);
-                if (pWhite != null) {
-                    pieceCanMove = false;
-                    return;
+            pieceCanMove = true;
+            let lastSquareLeft = 0;
+            for (let index = currentPosition; index >= currentPosition - 7; index--) {
+                if (index % 8 == 0) {
+                    lastSquareLeft = parseInt(index) + 1;
                 }
-            });
-            if (pieceCanMove && position == index) {
-                x = true;
-                break;
             }
-        }
-        if (x) {
-            return true;
-        }
-        pieceCanMove = true;
-        let lastSquareRight = 0;
-        for (let index = currentPosition; index <= parseInt(currentPosition) + 7; index++) {
-            if (index % 8 == 0) {
-                lastSquareRight = index;
+            if (currentPosition % 8 == 0) {
+                lastSquareLeft = currentPosition - 7;
             }
-        }
-        if (currentPosition % 8 == 0) {
-            lastSquareRight = currentPosition;
-        }
-        for (let index = parseInt(currentPosition) + 1; index <= lastSquareRight; index++) {
-            types.forEach(typeOf => {
-                const pWhite = document.getElementById(typeOf + color + index);
-                if (pWhite != null) {
-                    pieceCanMove = false;
-                    return;
+            for (let index = currentPosition - 1; index >= lastSquareLeft; index--) {
+                types.forEach(typeOf => {
+                    const pWhite = document.getElementById(typeOf + color + index);
+                    if (pWhite != null) {
+                        pieceCanMove = false;
+                        return;
+                    }
+                });
+                if (pieceCanMove && position == index) {
+                    x = true;
+                    break;
                 }
-            });
-            if (pieceCanMove && position == index) {
-                x = true;
-                break;
+            }
+            if (x) {
+                return true;
+            }
+            pieceCanMove = true;
+            let lastSquareRight = 0;
+            for (let index = currentPosition; index <= parseInt(currentPosition) + 7; index++) {
+                if (index % 8 == 0) {
+                    lastSquareRight = index;
+                }
+            }
+
+            for (let index = parseInt(currentPosition) + 1; index <= lastSquareRight; index++) {
+                types.forEach(typeOf => {
+                    const pWhite = document.getElementById(typeOf + color + index);
+                    if (pWhite != null) {
+                        pieceCanMove = false;
+                        return;
+                    }
+                });
+                if (pieceCanMove && position == index) {
+                    x = true;
+                    break;
+                }
+            }
+            if (x) {
+                return true;
+            }
+
+        }
+    }
+
+
+}
+
+const moveDiagonally = (position, currentPosition, type, color, x) => {
+    pieceCanMove = true;
+    console.log(type + ' type')
+    if (type == 'queen' || type == 'bishop') {
+        const pieceDiagonally = document.getElementById(type + color + currentPosition);
+        if (pieceDiagonally != null) {
+            let topRightSquare = 0;
+            for (let index = currentPosition; index >= 2; index -= 7) {
+                if (index % 8 == 0) {
+                    topRightSquare = index;
+                } else if (index < 8) {
+                    topRightSquare = index;
+                }
+            }
+            for (let index = currentPosition - 7; index >= topRightSquare; index -= 7) {
+                types.forEach(typeOf => {
+                    const pWhite = document.getElementById(typeOf + color + index);
+                    if (pWhite != null) {
+                        pieceCanMove = false;
+                        return;
+                    }
+                });
+                if (pieceCanMove && position == index) {
+                    x = true;
+                    break;
+                }
+            }
+            if (x) {
+                return true;
+            }
+            pieceCanMove = true;
+            let bottomLeftSquare = 0;
+            for (let index = parseInt(currentPosition) + 7; index <= 63; index += 7) {
+                if ((index - 1) % 8 == 0) {
+                    bottomLeftSquare = index;
+                } else if (index > 57) {
+                    bottomLeftSquare = index;
+                }
+            }
+            for (let index = parseInt(currentPosition) + 7; index <= bottomLeftSquare; index += 7) {
+                types.forEach(typeOf => {
+                    const pWhite = document.getElementById(typeOf + color + index);
+                    if (pWhite != null) {
+                        pieceCanMove = false;
+                        return;
+                    }
+                });
+                if (pieceCanMove && position == index) {
+                    x = true;
+                    break;
+                }
+            }
+            if (x) {
+                return true;
+            }
+            pieceCanMove = true;
+            let topLeftSquare = 0;
+            for (let index = currentPosition; index >= 1; index -= 9) {
+                if ((index - 1) % 8 == 0 && index != 1) {
+                    topLeftSquare = index;
+                } else if (index < 8) {
+                    topLeftSquare = index;
+                }
+            }
+            for (let index = currentPosition - 9; index >= topLeftSquare; index -= 9) {
+                types.forEach(typeOf => {
+                    const pWhite = document.getElementById(typeOf + color + index);
+                    if (pWhite != null) {
+                        pieceCanMove = false;
+                        return;
+                    }
+                });
+                if (pieceCanMove && position == index) {
+                    x = true;
+                    break;
+                }
+            }
+            if (x) {
+                return true;
+            }
+            pieceCanMove = true;
+            let bottomRightSquare = 0;
+            for (let index = parseInt(currentPosition) + 9; index <= 64; index += 9) {
+                if ((index - 1) % 8 == 0) {
+                    bottomRightSquare = index;
+                } else if (index > 57) {
+                    bottomRightSquare = index;
+                }
+            }
+            for (let index = parseInt(currentPosition) + 9; index <= bottomRightSquare; index += 9) {
+                types.forEach(typeOf => {
+                    const pWhite = document.getElementById(typeOf + color + index);
+                    if (pWhite != null) {
+                        pieceCanMove = false;
+                        return;
+                    }
+                });
+                if (pieceCanMove && position == index) {
+                    x = true;
+                    break;
+                }
+            }
+            if (x) {
+                return true;
             }
         }
-        if (x) {
-            return true;
+    }
+}
+
+const takePiece = (position, currentPosition, type) => {
+    if (whiteTurn) {
+        const takingPieceWhite = document.getElementById(type + 'White' + currentPosition);
+        if (takingPieceWhite != null) {
+            checkTypeBlack(position);
+            const pieceToTake = document.getElementById(chosenTypeBlack + 'Black' + position)
+            if (pieceToTake != null) {
+                return true;
+            }
+        }
+    } else {
+        const takingPieceBlack = document.getElementById(type + 'Black' + currentPosition);
+        if (takingPieceBlack != null) {
+            const pieceToTake = document.getElementById(chosenTypeWhite + 'White' + position)
+            checkTypeWhite(position);
+            if (pieceToTake != null) {
+                return true;
+            }
         }
     }
 
 }
+// chosenTypeWhite = 0;
+//  chosenTypeBlack = 0;
