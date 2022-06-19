@@ -18,6 +18,23 @@ let pawnSpecialBlack = false;
 let specialPawnPosition = 0;
 let pieceCanMove = false;
 let inTheWay = false;
+let whiteKingMove = false;
+let blackKingMove = false;
+let whiteRockLeftMove = false;
+let whiteRockRightMove = false;
+let blackRockLeftMove = false;
+let blackRockRightMove = false;
+let takenPiecesWhitePawns = document.getElementById('pawn-blacks');
+let takenPiecesBlackPawns = document.getElementById('pawn-White');
+let takenPiecesWhiteKnights = document.getElementById('knight-blacks');
+let takenPiecesBlackKnights = document.getElementById('knight-White');
+let takenPiecesWhiteBishops = document.getElementById('bishop-blacks');
+let takenPiecesBlackBishops = document.getElementById('bishop-White');
+let takenPiecesWhiteRocks = document.getElementById('rock-blacks');
+let takenPiecesBlackRocks = document.getElementById('rock-White');
+let takenPiecesWhiteQueens = document.getElementById('queen-blacks');
+let takenPiecesBlackQueens = document.getElementById('queen-White');
+let takenPieceId = 0;
 
 
 
@@ -159,7 +176,6 @@ const squareClick = (position) => {
         previousSquareClass = currentSquare.className;
         if (whiteTurn) {
             checkTypeWhite(position);
-
         } else {
             checkTypeBlack(position);
         }
@@ -198,7 +214,7 @@ const moveMe = (position, currentPosition, type) => {
             currentSquare.className = previousSquareClass;
             move = !move;
         } else {
-            movePieceWhite(position, currentPosition, square, currentSquare, pieceWhite, type, otherTypeBlack);
+            movePieceWhite(position, currentPosition, square, currentSquare, pieceWhite, type, otherTypeBlack, chosenTypeBlack);
         }
     } else {
         checkTypeWhite(position);
@@ -209,7 +225,7 @@ const moveMe = (position, currentPosition, type) => {
             move = !move;
             return;
         } else {
-            movePieceBlack(position, currentPosition, square, currentSquare, pieceBlack, type, otherTypeWhite);
+            movePieceBlack(position, currentPosition, square, currentSquare, pieceBlack, type, otherTypeWhite, chosenTypeWhite);
         }
     }
 }
@@ -241,6 +257,7 @@ const bishopMove = (position, currentPosition, type) => {
     }
 
 }
+
 const queenMove = (position, currentPosition, type) => {
     if (type == 'queen') {
         let x = false;
@@ -257,7 +274,6 @@ const queenMove = (position, currentPosition, type) => {
     }
 
 }
-
 
 const knightMove = (position, currentPosition, type) => {
     if (type == 'knight') {
@@ -279,7 +295,6 @@ const knightMove = (position, currentPosition, type) => {
                         return true;
                     }
                 } else {
-
                     checkTypeBlack(position);
                     if (chosenPieceBlack == null) {
                         return true;
@@ -316,6 +331,50 @@ const kingMove = (position, currentPosition, type) => {
                     }
                 }
             }
+            if (thisColor == 'White') {
+                if (position == 63 && whiteKingMove == false && whiteRockRightMove == false) {
+                    let betweenCastleSquareRightWhite = document.getElementById('63');
+                    let castleSquareRightWhite = document.getElementById('62');
+                    let whiteRockRightCastle = document.getElementById('rockWhite64');
+                    if (betweenCastleSquareRightWhite.hasChildNodes() == false && castleSquareRightWhite.hasChildNodes() == false) {
+                        castleSquareRightWhite.appendChild(whiteRockRightCastle);
+                        return true;
+                    }
+                }
+                if (position == 59 && whiteKingMove == false && whiteRockLeftMove == false) {
+                    let betweenCastleSquareLeftWhite1 = document.getElementById('58');
+                    let betweenCastleSquareLeftWhite2 = document.getElementById('59');
+                    let castleSquareLeftWhite = document.getElementById('60');
+                    let whiteRockLeftCastle = document.getElementById('rockWhite57');
+                    if (betweenCastleSquareLeftWhite1.hasChildNodes() == false &&
+                        betweenCastleSquareLeftWhite2.hasChildNodes() == false && castleSquareLeftWhite.hasChildNodes() == false) {
+                        castleSquareLeftWhite.appendChild(whiteRockLeftCastle);
+                        return true;
+                    }
+                }
+            } else if (thisColor == 'Black') {
+                if (position == 2 && blackKingMove == false && blackRockLeftMove == false) {
+                    let betweenCastleSquareLeftBlack = document.getElementById('2');
+                    let castleSquareLeftBlack = document.getElementById('3');
+                    let blackRockLeftCastle = document.getElementById('rockBlack1');
+                    if (betweenCastleSquareLeftBlack.hasChildNodes() == false && castleSquareLeftBlack.hasChildNodes() == false) {
+                        castleSquareLeftBlack.appendChild(blackRockLeftCastle);
+                        return true;
+                    }
+                }
+                if (position == 6 && blackKingMove == false && whiteRockRightMove == false) {
+                    let betweenCastleSquareRightBlack1 = document.getElementById('6');
+                    let betweenCastleSquareRightBlack2 = document.getElementById('7');
+                    let castleSquareRightBlack = document.getElementById('5');
+                    let blackRockRightCastle = document.getElementById('rockBlack8');
+                    if (betweenCastleSquareRightBlack1.hasChildNodes() == false &&
+                        betweenCastleSquareRightBlack2.hasChildNodes() == false && castleSquareRightBlack.hasChildNodes() == false) {
+                        castleSquareRightBlack.appendChild(blackRockRightCastle);
+                        return true;
+                    }
+                }
+            }
+
         }
     }
 }
@@ -436,8 +495,9 @@ const checkTypeBlack = (position) => {
     });
 }
 
-const movePieceBlack = (position, currentPosition, square, currentSquare, pieceBlack, type, otherPiece) => {
-    if (pawnTake(position, currentPosition, type)) {
+const movePieceBlack = (position, currentPosition, square, currentSquare, pieceBlack, type, otherPiece, otherType) => {
+    let takeYouBlack = document.getElementById(otherType + '-whites');
+    if (pawnTake(position, currentPosition, type) && otherType != 'king') {
         if (pawnSpecialWhite && type == 'pawn') {
             currentPosition++;
             const pawnWhite1 = document.getElementById('pawnWhite' + currentPosition);
@@ -456,8 +516,31 @@ const movePieceBlack = (position, currentPosition, square, currentSquare, pieceB
                 firstTurn = false;
                 newSquare.removeChild(pawnWhite);
                 pawnSpecialWhite = false;
+                pawnWhite.id = takenPieceId + ' ';
+                takenPieceId--;
+                pawnWhite.className = (otherType + '-white-taken');
+                takeYouBlack.appendChild(pawnWhite);
                 return;
             }
+        }
+        if (position >= 57) {
+            thisSquareClass = square.className;
+            currentSquare.className = previousSquareClass;
+            currentSquare.removeChild(pieceBlack);
+            pieceBlack.id = 'queenBlack' + position;
+            pieceBlack.className = 'queen-black';
+            square.appendChild(pieceBlack);
+            pieceBlack.id = type + 'Black' + position;
+            whiteTurn = !whiteTurn;
+            move = !move;
+            firstTurn = false;
+            square.removeChild(otherPiece);
+            pawnSpecialWhite = false;
+            otherPiece.id = takenPieceId + ' ';
+            takenPieceId--;
+            otherPiece.className = (otherType + '-white-taken');
+            takeYouBlack.appendChild(otherPiece);
+            return;
         }
         thisSquareClass = square.className;
         currentSquare.className = previousSquareClass;
@@ -469,13 +552,18 @@ const movePieceBlack = (position, currentPosition, square, currentSquare, pieceB
         firstTurn = false;
         square.removeChild(otherPiece);
         pawnSpecialWhite = false;
+        otherPiece.id = takenPieceId + ' ';
+        takenPieceId--;
+        otherPiece.className = (otherType + '-white-taken');
+        takeYouBlack.appendChild(otherPiece);
+
     } else if (pawnMove(position, currentPosition, type, otherPiece) ||
         rockMove(position, currentPosition, type) ||
         bishopMove(position, currentPosition, type) ||
         queenMove(position, currentPosition, type) ||
-        knightMove(position, currentPosition, type)||
+        knightMove(position, currentPosition, type) ||
         kingMove(position, currentPosition, type)) {
-        if (takePiece(position, currentPosition, type) && type != 'pawn') {
+        if (takePiece(position, currentPosition, type, otherType) && type != 'pawn') {
             thisSquareClass = square.className;
             currentSquare.className = previousSquareClass;
             currentSquare.removeChild(pieceBlack);
@@ -486,21 +574,43 @@ const movePieceBlack = (position, currentPosition, square, currentSquare, pieceB
             firstTurn = false;
             square.removeChild(otherPiece);
             pawnSpecialWhite = false;
+            otherPiece.id = takenPieceId + ' ';
+            takenPieceId--;
+            otherPiece.className = (otherType + '-white-taken');
+            takeYouBlack.appendChild(otherPiece);
             return;
         }
-        thisSquareClass = square.className;
-        currentSquare.className = previousSquareClass;
-        currentSquare.removeChild(pieceBlack);
-        square.appendChild(pieceBlack);
-        pieceBlack.id = type + 'Black' + position;
-        whiteTurn = !whiteTurn;
-        move = !move;
-        pawnSpecialWhite = false;
+        if (blackKingMove == false) {
+            castleBlackRight(currentPosition, type);
+            castleBlackLeft(currentPosition, type);
+        }
+        if (pawnMove(position, currentPosition, type, otherPiece) && position >= 57) {
+            currentSquare.className = previousSquareClass;
+            currentSquare.removeChild(pieceBlack);
+            pieceBlack.id = 'queenBlack' + position;
+            pieceBlack.className = 'queen-black';
+            square.appendChild(pieceBlack);
+            pieceBlack.id = type + 'Black' + position;
+            whiteTurn = !whiteTurn;
+            move = !move;
+            pawnSpecialWhite = false;
+            return;
+        }
+        if (otherType != 'king') {
+            currentSquare.className = previousSquareClass;
+            currentSquare.removeChild(pieceBlack);
+            square.appendChild(pieceBlack);
+            pieceBlack.id = type + 'Black' + position;
+            whiteTurn = !whiteTurn;
+            move = !move;
+            pawnSpecialWhite = false;
+        }
     }
 }
 
-const movePieceWhite = (position, currentPosition, square, currentSquare, pieceWhite, type, otherPiece) => {
-    if (pawnTake(position, currentPosition)) {
+const movePieceWhite = (position, currentPosition, square, currentSquare, pieceWhite, type, otherPiece, otherType) => {
+    let takeYouWhite = document.getElementById(otherType + '-blacks');
+    if (pawnTake(position, currentPosition) && otherType != 'king') {
         if (pawnSpecialBlack && type == 'pawn') {
             currentPosition++;
             const pawnBlack1 = document.getElementById('pawnBlack' + currentPosition);
@@ -519,8 +629,30 @@ const movePieceWhite = (position, currentPosition, square, currentSquare, pieceW
                 firstTurn = false;
                 newSquare.removeChild(pawnBlack);
                 pawnSpecialBlack = false;
+                pawnBlack.id = takenPieceId + ' ';
+                takenPieceId--;
+                pawnBlack.className = ('pawn-black-taken');
+                takeYouWhite.appendChild(pawnBlack);
                 return;
             }
+        }
+        if (position <= 8) {
+            thisSquareClass = square.className;
+            currentSquare.className = previousSquareClass;
+            currentSquare.removeChild(pieceWhite);
+            pieceWhite.id = 'queenWhite' + position;
+            pieceWhite.className = 'queen-White';
+            square.appendChild(pieceWhite);
+            whiteTurn = !whiteTurn;
+            move = !move;
+            firstTurn = false;
+            square.removeChild(otherPiece);
+            pawnSpecialBlack = false;
+            otherPiece.id = takenPieceId + ' ';
+            takenPieceId--;
+            otherPiece.className = (otherType + '-black-taken');
+            takeYouWhite.appendChild(otherPiece);
+            return;
         }
         thisSquareClass = square.className;
         currentSquare.className = previousSquareClass;
@@ -532,14 +664,18 @@ const movePieceWhite = (position, currentPosition, square, currentSquare, pieceW
         firstTurn = false;
         square.removeChild(otherPiece);
         pawnSpecialBlack = false;
+        otherPiece.id = takenPieceId + ' ';
+        takenPieceId--;
+        otherPiece.className = (otherType + '-black-taken');
+        takeYouWhite.appendChild(otherPiece);
 
     } else if (pawnMove(position, currentPosition, type, otherPiece) ||
         rockMove(position, currentPosition, type) ||
         bishopMove(position, currentPosition, type) ||
         queenMove(position, currentPosition, type) ||
-        knightMove(position, currentPosition, type)||
+        knightMove(position, currentPosition, type) ||
         kingMove(position, currentPosition, type)) {
-        if (takePiece(position, currentPosition, type) && type != 'pawn') {
+        if (takePiece(position, currentPosition, type, otherType) && type != 'pawn') {
             thisSquareClass = square.className;
             currentSquare.className = previousSquareClass;
             currentSquare.removeChild(pieceWhite);
@@ -550,17 +686,40 @@ const movePieceWhite = (position, currentPosition, square, currentSquare, pieceW
             firstTurn = false;
             square.removeChild(otherPiece);
             pawnSpecialBlack = false;
+            otherPiece.id = takenPieceId + ' ';
+            takenPieceId--;
+            otherPiece.className = (otherType + '-black-taken');
+            takeYouWhite.appendChild(otherPiece);
             return;
         }
-        thisSquareClass = square.className;
-        currentSquare.className = previousSquareClass;
-        currentSquare.removeChild(pieceWhite);
-        square.appendChild(pieceWhite);
-        pieceWhite.id = type + 'White' + position;
-        whiteTurn = !whiteTurn;
-        move = !move;
-        firstTurn = false;
-        pawnSpecialBlack = false;
+        if (whiteKingMove == false) {
+            castleWhiteRight(currentPosition, type);
+            castleWhiteLeft(currentPosition, type);
+        }
+        if (pawnMove(position, currentPosition, type, otherPiece) && position <= 8) {
+            thisSquareClass = square.className;
+            currentSquare.className = previousSquareClass;
+            currentSquare.removeChild(pieceWhite);
+            pieceWhite.id = 'queenWhite' + position;
+            pieceWhite.className = 'queen-White';
+            square.appendChild(pieceWhite);
+            whiteTurn = !whiteTurn;
+            move = !move;
+            firstTurn = false;
+            pawnSpecialBlack = false;
+            return;
+        }
+        if (otherType != 'king') {
+            thisSquareClass = square.className;
+            currentSquare.className = previousSquareClass;
+            currentSquare.removeChild(pieceWhite);
+            square.appendChild(pieceWhite);
+            pieceWhite.id = type + 'White' + position;
+            whiteTurn = !whiteTurn;
+            move = !move;
+            firstTurn = false;
+            pawnSpecialBlack = false;
+        }
     }
 }
 
@@ -659,7 +818,6 @@ const moveStraight = (position, currentPosition, type, color, x) => {
             if (x) {
                 return true;
             }
-
         }
     }
 
@@ -782,28 +940,77 @@ const moveDiagonally = (position, currentPosition, type, color, x) => {
     }
 }
 
-const takePiece = (position, currentPosition, type) => {
-    if (whiteTurn) {
-        const takingPieceWhite = document.getElementById(type + 'White' + currentPosition);
-        if (takingPieceWhite != null) {
-            checkTypeBlack(position);
-            const pieceToTake = document.getElementById(chosenTypeBlack + 'Black' + position)
-            if (pieceToTake != null) {
-                return true;
+const takePiece = (position, currentPosition, type, otherType) => {
+    if (otherType != 'king') {
+        if (whiteTurn) {
+            const takingPieceWhite = document.getElementById(type + 'White' + currentPosition);
+            if (takingPieceWhite != null) {
+                checkTypeBlack(position);
+                const pieceToTake = document.getElementById(chosenTypeBlack + 'Black' + position)
+                if (pieceToTake != null) {
+                    return true;
+                }
             }
-        }
-    } else {
-        const takingPieceBlack = document.getElementById(type + 'Black' + currentPosition);
-        if (takingPieceBlack != null) {
-            checkTypeWhite(position);
-            const pieceToTake = document.getElementById(chosenTypeWhite + 'White' + position)
-            if (pieceToTake != null) {
-                return true;
+        } else {
+            const takingPieceBlack = document.getElementById(type + 'Black' + currentPosition);
+            if (takingPieceBlack != null) {
+                checkTypeWhite(position);
+                const pieceToTake = document.getElementById(chosenTypeWhite + 'White' + position)
+                if (pieceToTake != null) {
+                    return true;
+                }
             }
         }
     }
 
 }
+castleWhiteRight = (currentPosition, type) => {
+    let canRockWhiteRightCastle1 = document.getElementById('rock' + 'White' + currentPosition);
+    if (type == 'rock' && currentPosition == 64) {
+        if (canRockWhiteRightCastle1 != null) {
+            whiteRockRightMove = true;
+        }
+    }
+    let canKingWHiteCastle1 = document.getElementById('king' + 'White' + currentPosition);
+    if (canKingWHiteCastle1 != null) {
+        whiteKingMove = true;
+    }
+}
 
-// chosenTypeWhite = 0;
-//  chosenTypeBlack = 0;
+
+castleWhiteLeft = (currentPosition, type) => {
+    let canRockWhiteRightCastle2 = document.getElementById('rock' + 'White' + currentPosition);
+    if (type == 'rock' && currentPosition == 57) {
+        if (canRockWhiteRightCastle2 != null) {
+            whiteRockLeftMove = true;
+        }
+    }
+    let canKingWHiteCastle2 = document.getElementById('king' + 'White' + currentPosition);
+    if (canKingWHiteCastle2 != null) {
+        whiteKingMove = true;
+    }
+}
+castleBlackRight = (currentPosition, type) => {
+    let canRockBlackRightCastle1 = document.getElementById('rock' + 'Black' + currentPosition);
+    if (type == 'rock' && currentPosition == 8) {
+        if (canRockBlackRightCastle1 != null) {
+            blackRockRightMove = true;
+        }
+    }
+    let canKingBlackCastle1 = document.getElementById('king' + 'Black' + currentPosition);
+    if (canKingBlackCastle1 != null) {
+        blackKingMove = true;
+    }
+}
+castleBlackLeft = (currentPosition, type) => {
+    let canRockBlackRightCastle2 = document.getElementById('rock' + 'Black' + currentPosition);
+    if (type == 'rock' && currentPosition == 1) {
+        if (canRockBlackRightCastle2 != null) {
+            blackRockLeftMove = true;
+        }
+    }
+    let canKingBlackCastle2 = document.getElementById('king' + 'White' + currentPosition);
+    if (canKingBlackCastle2 != null) {
+        blackKingMove = true;
+    }
+}
