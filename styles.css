@@ -23,7 +23,7 @@ body {
 table {
     background-color: black;
     height: 640px;
-    width: 740px;
+    width: 660px;
     border: 1px solid black;
 }
 
@@ -132,6 +132,10 @@ table {
 
 .moving {
     background-color: rgb(113, 132, 176);
+}
+
+.check {
+    background-color: rgb(252, 112, 112);
 }
 
 #taken-white{

@@ -24,6 +24,7 @@ let whiteRockLeftMove = false;
 let whiteRockRightMove = false;
 let blackRockLeftMove = false;
 let blackRockRightMove = false;
+let takenPieceId = 0;
 let takenPiecesWhitePawns = document.getElementById('pawn-blacks');
 let takenPiecesBlackPawns = document.getElementById('pawn-White');
 let takenPiecesWhiteKnights = document.getElementById('knight-blacks');
@@ -34,7 +35,45 @@ let takenPiecesWhiteRocks = document.getElementById('rock-blacks');
 let takenPiecesBlackRocks = document.getElementById('rock-White');
 let takenPiecesWhiteQueens = document.getElementById('queen-blacks');
 let takenPiecesBlackQueens = document.getElementById('queen-White');
-let takenPieceId = 0;
+let checkSquare = null;
+let checkSquareClass = null;
+
+let knightLeftCheckBlack = null;
+let knightRightCheckBlack = null;
+let bishopLeftCheckBlack = null;
+let bishopRightCheckBlack = null;
+let rockRightCheckBlack = null;
+let rockLeftCheckBlack = null;
+let queenBlackCheck = null;
+
+let knightLeftCheckWhite = null;
+let knightRightCheckWhite = null;
+let bishopLeftCheckWhite = null;
+let bishopRightCheckWhite = null;
+let rockRightCheckWhite = null;
+let rockLeftCheckWhite = null;
+let queenWhiteCheck = null;
+
+let checkKingWhite = false;
+let checkKingBlack = false;
+
+let kingWhiteLocation = 61;
+let queenWhiteLocation = 60;
+let rockWhiteLeftLocation = 57;
+let rockWhiteRightLocation = 64;
+let bishopLeftWhiteLocation = 59;
+let bishopRightWhiteLocation = 62;
+let knightLeftWhiteLocation = 58;
+let knightRightWhiteLocation = 63;
+
+let kingBlackLocation = 5;
+let queenBlackLocation = 4;
+let rockBlackLeftLocation = 1;
+let rockBlackRightLocation = 8;
+let bishopLeftBlackLocation = 3;
+let bishopRightBlackLocation = 6;
+let knightLeftBlackLocation = 2;
+let knightRightBlackLocation = 7;
 
 
 
@@ -149,9 +188,9 @@ queenWhite.id = 'queenWhite' + 60;
 queenWhite.className = 'queen-White';
 queenSquare1.appendChild(queenWhite);
 
-const queenSquare2 = document.getElementById(5);
+const queenSquare2 = document.getElementById(4);
 const queenBlack = document.createElement('div');
-queenBlack.id = 'queenBlack' + 5;
+queenBlack.id = 'queenBlack' + 4;
 queenBlack.className = 'queen-black';
 queenSquare2.appendChild(queenBlack);
 
@@ -161,12 +200,11 @@ kingWhite.id = 'kingWhite' + 61;
 kingWhite.className = 'king-White';
 kingSquare1.appendChild(kingWhite);
 
-const kingSquare2 = document.getElementById(4);
+const kingSquare2 = document.getElementById(5);
 const kingBlack = document.createElement('div');
-kingBlack.id = 'kingBlack' + 4;
+kingBlack.id = 'kingBlack' + 5;
 kingBlack.className = 'king-black';
 kingSquare2.appendChild(kingBlack);
-
 
 const squareClick = (position) => {
     console.log(position);
@@ -238,6 +276,19 @@ const rockMove = (position, currentPosition, type) => {
             myColor = 'Black';
         }
         if (moveStraight(position, currentPosition, type, myColor, x)) {
+            if (whiteTurn) {
+                if (rockWhiteLeftLocation == currentPosition) {
+                    rockWhiteLeftLocation = position;
+                } else if (rockWhiteRightLocation == currentPosition) {
+                    rockWhiteRightLocation = position;
+                }
+            } else {
+                if (rockBlackLeftLocation == currentPosition) {
+                    rockBlackLeftLocation = position;
+                } else if (rockBlackRightLocation == currentPosition) {
+                    rockBlackRightLocation = position;
+                }
+            }
             return true;
         }
     }
@@ -252,6 +303,19 @@ const bishopMove = (position, currentPosition, type) => {
             myColor = 'Black';
         }
         if (moveDiagonally(position, currentPosition, type, myColor, x)) {
+            if (whiteTurn) {
+                if (bishopLeftWhiteLocation == currentPosition) {
+                    bishopLeftWhiteLocation = position;
+                } else if (bishopRightWhiteLocation == currentPosition) {
+                    bishopRightWhiteLocation = position;
+                }
+            } else {
+                if (bishopLeftBlackLocation == currentPosition) {
+                    bishopLeftBlackLocation = position;
+                } else if (bishopRightBlackLocation == currentPosition) {
+                    bishopRightBlackLocation = position;
+                }
+            }
             return true;
         }
     }
@@ -266,9 +330,18 @@ const queenMove = (position, currentPosition, type) => {
             myColor = 'Black';
         }
         if (moveStraight(position, currentPosition, type, myColor, x)) {
+            if (whiteTurn) {
+                queenWhiteLocation = position;
+            } else {
+                queenBlackLocation = position;
+            }
             return true;
-        }
-        if (moveDiagonally(position, currentPosition, type, myColor, x)) {
+        } else if (moveDiagonally(position, currentPosition, type, myColor, x)) {
+            if (whiteTurn) {
+                queenWhiteLocation = position;
+            } else {
+                queenBlackLocation = position;
+            }
             return true;
         }
     }
@@ -285,18 +358,130 @@ const knightMove = (position, currentPosition, type) => {
         chosenPieceBlack = null;
         const knight = document.getElementById(type + thisColor + currentPosition);
         if (knight != null) {
-            if (currentPosition - 6 == position || currentPosition - 10 == position ||
+            if ((currentPosition - 1) % 8 == 0) {
+                if (currentPosition - 6 == position || currentPosition - 15 == position ||
+                    position - 10 == currentPosition || position - 17 == currentPosition) {
+                    if (thisColor == 'White') {
+                        checkTypeWhite(position);
+                        if (chosenPieceWhite == null) {
+                            if (knightLeftWhiteLocation == currentPosition) {
+                                knightLeftWhiteLocation = position;
+                            } else if (knightRightWhiteLocation == currentPosition) {
+                                knightRightWhiteLocation = position;
+                            }
+                            return true;
+                        }
+                    } else {
+                        checkTypeBlack(position);
+                        if (chosenPieceBlack == null) {
+                            if (knightLeftBlackLocation == currentPosition) {
+                                knightLeftBlackLocation = position;
+                            } else if (knightRightBlackLocation == currentPosition) {
+                                knightRightBlackLocation = position;
+                            }
+                            return true;
+                        }
+                    }
+                }
+            } else if ((currentPosition - 2) % 8 == 0) {
+                if (currentPosition - 6 == position || currentPosition - 15 == position ||
+                    currentPosition - 17 == position || position - 10 == currentPosition ||
+                    position - 15 == currentPosition || position - 17 == currentPosition) {
+                    if (thisColor == 'White') {
+                        checkTypeWhite(position);
+                        if (chosenPieceWhite == null) {
+                            if (knightLeftWhiteLocation == currentPosition) {
+                                knightLeftWhiteLocation = position;
+                            } else if (knightRightWhiteLocation == currentPosition) {
+                                knightRightWhiteLocation = position;
+                            }
+                            return true;
+                        }
+                    } else {
+                        checkTypeBlack(position);
+                        if (chosenPieceBlack == null) {
+                            if (knightLeftBlackLocation == currentPosition) {
+                                knightLeftBlackLocation = position;
+                            } else if (knightRightBlackLocation == currentPosition) {
+                                knightRightBlackLocation = position;
+                            }
+                            return true;
+                        }
+                    }
+                }
+            } else if (currentPosition % 8 == 0) {
+                if (currentPosition - 10 == position || currentPosition - 17 == position ||
+                    position - 6 == currentPosition || position - 15 == currentPosition) {
+                    if (thisColor == 'White') {
+                        checkTypeWhite(position);
+                        if (chosenPieceWhite == null) {
+                            if (knightLeftWhiteLocation == currentPosition) {
+                                knightLeftWhiteLocation = position;
+                            } else if (knightRightWhiteLocation == currentPosition) {
+                                knightRightWhiteLocation = position;
+                            }
+                            return true;
+                        }
+                    } else {
+                        checkTypeBlack(position);
+                        if (chosenPieceBlack == null) {
+                            if (knightLeftBlackLocation == currentPosition) {
+                                knightLeftBlackLocation = position;
+                            } else if (knightRightBlackLocation == currentPosition) {
+                                knightRightBlackLocation = position;
+                            }
+                            return true;
+                        }
+                    }
+                }
+            } else if ((parseInt(currentPosition) + 1) % 8 == 0) {
+                if (currentPosition - 10 == position || currentPosition - 15 == position ||
+                    currentPosition - 17 == position || position - 6 == currentPosition ||
+                    position - 15 == currentPosition || position - 17 == currentPosition) {
+                    if (thisColor == 'White') {
+                        checkTypeWhite(position);
+                        if (chosenPieceWhite == null) {
+                            if (knightLeftWhiteLocation == currentPosition) {
+                                knightLeftWhiteLocation = position;
+                            } else if (knightRightWhiteLocation == currentPosition) {
+                                knightRightWhiteLocation = position;
+                            }
+                            return true;
+                        }
+                    } else {
+                        checkTypeBlack(position);
+                        if (chosenPieceBlack == null) {
+                            if (knightLeftBlackLocation == currentPosition) {
+                                knightLeftBlackLocation = position;
+                            } else if (knightRightBlackLocation == currentPosition) {
+                                knightRightBlackLocation = position;
+                            }
+                            return true;
+                        }
+                    }
+                }
+            } else if (currentPosition - 6 == position || currentPosition - 10 == position ||
                 currentPosition - 15 == position || currentPosition - 17 == position ||
                 position - 6 == currentPosition || position - 10 == currentPosition ||
                 position - 15 == currentPosition || position - 17 == currentPosition) {
                 if (thisColor == 'White') {
                     checkTypeWhite(position);
                     if (chosenPieceWhite == null) {
+                        if (knightLeftWhiteLocation == currentPosition) {
+                            knightLeftWhiteLocation = position;
+                        } else if (knightRightWhiteLocation == currentPosition) {
+                            knightRightWhiteLocation = position;
+                        }
                         return true;
                     }
                 } else {
                     checkTypeBlack(position);
                     if (chosenPieceBlack == null) {
+                        if (knightLeftBlackLocation == currentPosition) {
+                            knightLeftBlackLocation = position;
+                        } else if (knightRightBlackLocation == currentPosition) {
+                            knightRightBlackLocation = position;
+                        }
                         return true;
                     }
                 }
@@ -338,6 +523,7 @@ const kingMove = (position, currentPosition, type) => {
                     let whiteRockRightCastle = document.getElementById('rockWhite64');
                     if (betweenCastleSquareRightWhite.hasChildNodes() == false && castleSquareRightWhite.hasChildNodes() == false) {
                         castleSquareRightWhite.appendChild(whiteRockRightCastle);
+                        whiteRockRightCastle.id = ('rockWhite62')
                         return true;
                     }
                 }
@@ -349,27 +535,32 @@ const kingMove = (position, currentPosition, type) => {
                     if (betweenCastleSquareLeftWhite1.hasChildNodes() == false &&
                         betweenCastleSquareLeftWhite2.hasChildNodes() == false && castleSquareLeftWhite.hasChildNodes() == false) {
                         castleSquareLeftWhite.appendChild(whiteRockLeftCastle);
+                        whiteRockLeftCastle.id = ('rockWhite60')
                         return true;
                     }
                 }
             } else if (thisColor == 'Black') {
-                if (position == 2 && blackKingMove == false && blackRockLeftMove == false) {
-                    let betweenCastleSquareLeftBlack = document.getElementById('2');
-                    let castleSquareLeftBlack = document.getElementById('3');
-                    let blackRockLeftCastle = document.getElementById('rockBlack1');
-                    if (betweenCastleSquareLeftBlack.hasChildNodes() == false && castleSquareLeftBlack.hasChildNodes() == false) {
-                        castleSquareLeftBlack.appendChild(blackRockLeftCastle);
+                if (position == 7 && blackKingMove == false && blackRockRightMove == false) {
+                    let betweenCastleSquareRightBlack = document.getElementById('7');
+                    let castleSquareRightBlack = document.getElementById('6');
+                    let blackRockRightCastle = document.getElementById('rockBlack8');
+                    if (betweenCastleSquareRightBlack.hasChildNodes() == false && castleSquareRightBlack.hasChildNodes() == false) {
+                        castleSquareRightBlack.appendChild(blackRockRightCastle);
+                        kingBlackLocation = position;
+                        blackRockRightCastle.id = 'rockBlack6';
                         return true;
                     }
                 }
-                if (position == 6 && blackKingMove == false && whiteRockRightMove == false) {
-                    let betweenCastleSquareRightBlack1 = document.getElementById('6');
-                    let betweenCastleSquareRightBlack2 = document.getElementById('7');
-                    let castleSquareRightBlack = document.getElementById('5');
-                    let blackRockRightCastle = document.getElementById('rockBlack8');
-                    if (betweenCastleSquareRightBlack1.hasChildNodes() == false &&
-                        betweenCastleSquareRightBlack2.hasChildNodes() == false && castleSquareRightBlack.hasChildNodes() == false) {
-                        castleSquareRightBlack.appendChild(blackRockRightCastle);
+                if (position == 3 && blackKingMove == false && blackRockLeftMove == false) {
+                    let betweenCastleSquareLeftBlack1 = document.getElementById('2');
+                    let betweenCastleSquareLeftBlack2 = document.getElementById('2');
+                    let castleSquareLeftBlack = document.getElementById('4');
+                    let blackRockLeftCastle = document.getElementById('rockBlack1');
+                    if (betweenCastleSquareLeftBlack1.hasChildNodes() == false &&
+                        betweenCastleSquareLeftBlack2.hasChildNodes() == false && castleSquareLeftBlack.hasChildNodes() == false) {
+                        castleSquareLeftBlack.appendChild(blackRockLeftCastle);
+                        kingBlackLocation = position;
+                        blackRockLeftCastle.id = ('rockBlack4')
                         return true;
                     }
                 }
@@ -504,6 +695,7 @@ const movePieceBlack = (position, currentPosition, square, currentSquare, pieceB
             currentPosition--;
             const pawnWhite2 = document.getElementById('pawnWhite' + (currentPosition - 1));
             if (pawnWhite1 != null || pawnWhite2 != null) {
+                takeYouBlack = document.getElementById('pawn-whites');
                 const pawnWhite = document.getElementById('pawnWhite' + specialPawnPosition);
                 const newSquare = document.getElementById(specialPawnPosition);
                 thisSquareClass = square.className;
@@ -511,15 +703,26 @@ const movePieceBlack = (position, currentPosition, square, currentSquare, pieceB
                 currentSquare.removeChild(pieceBlack);
                 square.appendChild(pieceBlack);
                 pieceBlack.id = type + 'Black' + position;
+                newSquare.removeChild(pawnWhite);
+                if (isCheck('White', kingBlackLocation)) {
+                    pieceBlack.id = type + 'Black' + currentPosition;
+                    currentSquare.appendChild(pieceBlack);
+                    newSquare.appendChild(pawnWhite);
+                    move = !move;
+                    return;
+                }
                 whiteTurn = !whiteTurn;
                 move = !move;
                 firstTurn = false;
-                newSquare.removeChild(pawnWhite);
                 pawnSpecialWhite = false;
                 pawnWhite.id = takenPieceId + ' ';
                 takenPieceId--;
-                pawnWhite.className = (otherType + '-white-taken');
+                pawnWhite.className = ('pawn-white-taken');
                 takeYouBlack.appendChild(pawnWhite);
+                if (isCheck('Black', kingWhiteLocation)) {
+                    checkSquareClass = checkSquare.className;
+                    checkSquare.className = 'check';
+                }
                 return;
             }
         }
@@ -530,32 +733,58 @@ const movePieceBlack = (position, currentPosition, square, currentSquare, pieceB
             pieceBlack.id = 'queenBlack' + position;
             pieceBlack.className = 'queen-black';
             square.appendChild(pieceBlack);
-            pieceBlack.id = type + 'Black' + position;
+            square.removeChild(otherPiece);
+            if (isCheck('White', kingBlackLocation)) {
+                square.removeChild(pieceBlack);
+                pieceBlack.id = 'pawnBlack' + currentPosition;
+                pieceBlack.className = 'pawn-black';
+                currentSquare.appendChild(pieceBlack);
+                move = !move;
+                return;
+            }
             whiteTurn = !whiteTurn;
             move = !move;
             firstTurn = false;
-            square.removeChild(otherPiece);
             pawnSpecialWhite = false;
             otherPiece.id = takenPieceId + ' ';
             takenPieceId--;
             otherPiece.className = (otherType + '-white-taken');
             takeYouBlack.appendChild(otherPiece);
+            if (isCheck('Black', kingWhiteLocation)) {
+                checkSquareClass = checkSquare.className;
+                checkSquare.className = 'check';
+            }
             return;
         }
         thisSquareClass = square.className;
         currentSquare.className = previousSquareClass;
         currentSquare.removeChild(pieceBlack);
         square.appendChild(pieceBlack);
+        square.removeChild(otherPiece);
         pieceBlack.id = type + 'Black' + position;
+        if (isCheck('White', kingBlackLocation)) {
+            square.removeChild(pieceBlack);
+            square.appendChild(otherPiece);
+            pieceBlack.id = type + 'Black' + currentPosition;
+            currentSquare.appendChild(pieceBlack);
+            move = !move;
+            return;
+        }
         whiteTurn = !whiteTurn;
         move = !move;
         firstTurn = false;
-        square.removeChild(otherPiece);
         pawnSpecialWhite = false;
         otherPiece.id = takenPieceId + ' ';
         takenPieceId--;
         otherPiece.className = (otherType + '-white-taken');
         takeYouBlack.appendChild(otherPiece);
+        if (checkSquare != null && checkSquareClass != null) {
+            checkSquare.className = checkSquareClass;
+        }
+        if (isCheck('Black', kingWhiteLocation)) {
+            checkSquareClass = checkSquare.className;
+            checkSquare.className = 'check';
+        }
 
     } else if (pawnMove(position, currentPosition, type, otherPiece) ||
         rockMove(position, currentPosition, type) ||
@@ -568,16 +797,36 @@ const movePieceBlack = (position, currentPosition, square, currentSquare, pieceB
             currentSquare.className = previousSquareClass;
             currentSquare.removeChild(pieceBlack);
             square.appendChild(pieceBlack);
+            square.removeChild(otherPiece);
             pieceBlack.id = type + 'Black' + position;
+            if (isCheck('White', kingBlackLocation)) {
+                square.appendChild(otherPiece);
+                pieceBlack.id = type + 'Black' + currentPosition;
+                currentSquare.appendChild(pieceBlack);
+                move = !move;
+                return;
+            }
             whiteTurn = !whiteTurn;
             move = !move;
             firstTurn = false;
-            square.removeChild(otherPiece);
             pawnSpecialWhite = false;
             otherPiece.id = takenPieceId + ' ';
             takenPieceId--;
             otherPiece.className = (otherType + '-white-taken');
             takeYouBlack.appendChild(otherPiece);
+            if (type == 'king') {
+                kingBlackLocation = position;
+                if (checkSquare != null && checkSquareClass != null) {
+                    checkSquare.className = checkSquareClass;
+                }
+            }
+            if (checkSquare != null && checkSquareClass != null) {
+                checkSquare.className = checkSquareClass;
+            }
+            if (isCheck('Black', kingWhiteLocation)) {
+                checkSquareClass = checkSquare.className;
+                checkSquare.className = 'check';
+            }
             return;
         }
         if (blackKingMove == false) {
@@ -585,28 +834,73 @@ const movePieceBlack = (position, currentPosition, square, currentSquare, pieceB
             castleBlackLeft(currentPosition, type);
         }
         if (pawnMove(position, currentPosition, type, otherPiece) && position >= 57) {
+            thisSquareClass = square.className;
             currentSquare.className = previousSquareClass;
             currentSquare.removeChild(pieceBlack);
             pieceBlack.id = 'queenBlack' + position;
             pieceBlack.className = 'queen-black';
             square.appendChild(pieceBlack);
-            pieceBlack.id = type + 'Black' + position;
+            if (isCheck('White', position)) {
+                square.removeChild(pieceBlack);
+                pieceBlack.id = 'pawnBlack' + currentPosition;
+                pieceBlack.className = 'pawn-black';
+                currentSquare.appendChild(pieceBlack);
+                move = !move;
+                return;
+            }
             whiteTurn = !whiteTurn;
             move = !move;
             pawnSpecialWhite = false;
+            if (checkSquare != null && checkSquareClass != null) {
+                checkSquare.className = checkSquareClass;
+            }
+            if (isCheck('Black', kingWhiteLocation)) {
+                checkSquareClass = checkSquare.className;
+                checkSquare.className = 'check';
+            }
             return;
         }
         if (otherType != 'king') {
+            thisSquareClass = square.className;
             currentSquare.className = previousSquareClass;
             currentSquare.removeChild(pieceBlack);
             square.appendChild(pieceBlack);
             pieceBlack.id = type + 'Black' + position;
+            if (type == 'king') {
+                if (isCheck('White', position)) {
+                    square.removeChild(pieceBlack);
+                    currentSquare.appendChild(pieceBlack);
+                    pieceBlack.id = type + 'Black' + currentPosition;
+                    move = !move;
+                    return;
+                }
+            } else if (isCheck('White', kingBlackLocation)) {
+                square.removeChild(pieceBlack);
+                currentSquare.appendChild(pieceBlack);
+                pieceBlack.id = type + 'Black' + currentPosition;
+                move = !move;
+                return;
+            }
             whiteTurn = !whiteTurn;
             move = !move;
+            if (type == 'king') {
+                kingBlackLocation = position;
+            }
+            if (checkSquare != null && checkSquareClass != null) {
+                checkSquare.className = checkSquareClass;
+            }
             pawnSpecialWhite = false;
+            if (isCheck('Black', kingWhiteLocation)) {
+                checkSquareClass = checkSquare.className;
+                checkSquare.className = 'check';
+            }
         }
+    } else {
+        currentSquare.className = previousSquareClass;
+        move = !move;
     }
 }
+
 
 const movePieceWhite = (position, currentPosition, square, currentSquare, pieceWhite, type, otherPiece, otherType) => {
     let takeYouWhite = document.getElementById(otherType + '-blacks');
@@ -617,6 +911,7 @@ const movePieceWhite = (position, currentPosition, square, currentSquare, pieceW
             currentPosition--;
             const pawnBlack2 = document.getElementById('pawnBlack' + (currentPosition - 1));
             if (pawnBlack1 != null || pawnBlack2 != null) {
+                takeYouWhite = document.getElementById('pawn-blacks');
                 const pawnBlack = document.getElementById('pawnBlack' + specialPawnPosition);
                 const newSquare = document.getElementById(specialPawnPosition);
                 thisSquareClass = square.className;
@@ -624,15 +919,26 @@ const movePieceWhite = (position, currentPosition, square, currentSquare, pieceW
                 currentSquare.removeChild(pieceWhite);
                 square.appendChild(pieceWhite);
                 pieceWhite.id = type + 'White' + position;
+                newSquare.removeChild(pawnBlack);
+                if (isCheck('Black', kingWhiteLocation)) {
+                    pieceWhite.id = type + 'White' + currentSquare;
+                    currentSquare.appendChild(pieceWhite);
+                    newSquare.appendChild(pawnBlack);
+                    move = !move;
+                    return;
+                }
                 whiteTurn = !whiteTurn;
                 move = !move;
                 firstTurn = false;
-                newSquare.removeChild(pawnBlack);
                 pawnSpecialBlack = false;
                 pawnBlack.id = takenPieceId + ' ';
                 takenPieceId--;
                 pawnBlack.className = ('pawn-black-taken');
                 takeYouWhite.appendChild(pawnBlack);
+                if (isCheck('White', kingBlackLocation)) {
+                    checkSquareClass = checkSquare.className;
+                    checkSquare.className = 'check';
+                }
                 return;
             }
         }
@@ -643,31 +949,58 @@ const movePieceWhite = (position, currentPosition, square, currentSquare, pieceW
             pieceWhite.id = 'queenWhite' + position;
             pieceWhite.className = 'queen-White';
             square.appendChild(pieceWhite);
+            square.removeChild(otherPiece);
+            if (isCheck('Black', kingWhiteLocation)) {
+                square.removeChild(pieceWhite);
+                pieceWhite.id = 'queenWhite' + currentPosition;
+                currentSquare.appendChild(pieceWhite);
+                square.appendChild(otherPiece);
+                move = !move;
+                return;
+            }
             whiteTurn = !whiteTurn;
             move = !move;
             firstTurn = false;
-            square.removeChild(otherPiece);
             pawnSpecialBlack = false;
             otherPiece.id = takenPieceId + ' ';
             takenPieceId--;
             otherPiece.className = (otherType + '-black-taken');
             takeYouWhite.appendChild(otherPiece);
+            if (isCheck('White', kingBlackLocation)) {
+                checkSquareClass = checkSquare.className;
+                checkSquare.className = 'check';
+            }
             return;
         }
         thisSquareClass = square.className;
         currentSquare.className = previousSquareClass;
         currentSquare.removeChild(pieceWhite);
         square.appendChild(pieceWhite);
+        square.removeChild(otherPiece);
         pieceWhite.id = type + 'White' + position;
+        if (isCheck('Black', kingWhiteLocation)) {
+            square.removeChild(pieceWhite);
+            pieceWhite.id = type + 'White' + currentPosition;
+            currentSquare.appendChild(pieceWhite);
+            square.appendChild(otherPiece);
+            move = !move;
+            return;
+        }
         whiteTurn = !whiteTurn;
         move = !move;
         firstTurn = false;
-        square.removeChild(otherPiece);
         pawnSpecialBlack = false;
         otherPiece.id = takenPieceId + ' ';
         takenPieceId--;
         otherPiece.className = (otherType + '-black-taken');
         takeYouWhite.appendChild(otherPiece);
+        if (checkSquare != null && checkSquareClass != null) {
+            checkSquare.className = checkSquareClass;
+        }
+        if (isCheck('White', kingBlackLocation)) {
+            checkSquareClass = checkSquare.className;
+            checkSquare.className = 'check';
+        }
 
     } else if (pawnMove(position, currentPosition, type, otherPiece) ||
         rockMove(position, currentPosition, type) ||
@@ -681,15 +1014,35 @@ const movePieceWhite = (position, currentPosition, square, currentSquare, pieceW
             currentSquare.removeChild(pieceWhite);
             square.appendChild(pieceWhite);
             pieceWhite.id = type + 'White' + position;
+            square.removeChild(otherPiece);
+            if (isCheck('Black', kingWhiteLocation)) {
+                currentSquare.appendChild(pieceWhite);
+                square.appendChild(otherPiece);
+                pieceWhite.id = type + 'White' + currentPosition;
+                move = !move;
+                return;
+            }
             whiteTurn = !whiteTurn;
             move = !move;
             firstTurn = false;
-            square.removeChild(otherPiece);
             pawnSpecialBlack = false;
             otherPiece.id = takenPieceId + ' ';
             takenPieceId--;
             otherPiece.className = (otherType + '-black-taken');
             takeYouWhite.appendChild(otherPiece);
+            if (type == 'king') {
+                kingWhiteLocation = position;
+                if (checkSquare != null && checkSquareClass != null) {
+                    checkSquare.className = checkSquareClass;
+                }
+            }
+            if (checkSquare != null && checkSquareClass != null) {
+                checkSquare.className = checkSquareClass;
+            }
+            if (isCheck('White', kingBlackLocation)) {
+                checkSquareClass = checkSquare.className;
+                checkSquare.className = 'check';
+            }
             return;
         }
         if (whiteKingMove == false) {
@@ -703,10 +1056,25 @@ const movePieceWhite = (position, currentPosition, square, currentSquare, pieceW
             pieceWhite.id = 'queenWhite' + position;
             pieceWhite.className = 'queen-White';
             square.appendChild(pieceWhite);
+            if (isCheck('Black', position)) {
+                square.removeChild(pieceWhite);
+                pieceWhite.id = 'pawnWhite' + currentPosition;
+                pieceWhite.className = 'pawn-White';
+                currentSquare.appendChild(pieceWhite);
+                move = !move;
+                return;
+            }
             whiteTurn = !whiteTurn;
             move = !move;
             firstTurn = false;
             pawnSpecialBlack = false;
+            if (checkSquare != null && checkSquareClass != null) {
+                checkSquare.className = checkSquareClass;
+            }
+            if (isCheck('White', kingBlackLocation)) {
+                checkSquareClass = checkSquare.className;
+                checkSquare.className = 'check';
+            }
             return;
         }
         if (otherType != 'king') {
@@ -715,11 +1083,39 @@ const movePieceWhite = (position, currentPosition, square, currentSquare, pieceW
             currentSquare.removeChild(pieceWhite);
             square.appendChild(pieceWhite);
             pieceWhite.id = type + 'White' + position;
+            if (type == 'king') {
+                if (isCheck('Black', position)) {
+                    square.removeChild(pieceWhite);
+                    currentSquare.appendChild(pieceWhite);
+                    pieceWhite.id = type + 'White' + currentPosition;
+                    move = !move;
+                    return;
+                }
+            } else if (isCheck('Black', kingWhiteLocation)) {
+                square.removeChild(pieceWhite);
+                currentSquare.appendChild(pieceWhite);
+                pieceWhite.id = type + 'White' + currentPosition;
+                move = !move;
+                return;
+            }
             whiteTurn = !whiteTurn;
             move = !move;
+            if (type == 'king') {
+                kingWhiteLocation = position;
+            }
+            if (checkSquare != null && checkSquareClass != null) {
+                checkSquare.className = checkSquareClass;
+            }
             firstTurn = false;
             pawnSpecialBlack = false;
+            if (isCheck('White', kingBlackLocation)) {
+                checkSquareClass = checkSquare.className;
+                checkSquare.className = 'check';
+            }
         }
+    } else {
+        currentSquare.className = previousSquareClass;
+        move = !move;
     }
 }
 
@@ -1013,4 +1409,470 @@ castleBlackLeft = (currentPosition, type) => {
     if (canKingBlackCastle2 != null) {
         blackKingMove = true;
     }
+}
+
+let xx1 = true;
+let xx2 = true;
+let isGettingChecked = false;
+
+const isGettingCheckDiagonally = (forWho, anyKingPosition) => {
+    isGettingChecked = false;
+    let kingLocation = kingWhiteLocation;
+    checkKingWhite = false;
+    checkKingBlack = false;
+    let colorThis = 'White';
+    let colorOther = 'Black';
+    if (forWho == 'White') {
+        kingLocation = kingBlackLocation
+        colorThis = 'Black';
+        colorOther = 'White';
+    }
+
+    xx1 = true;
+    xx2 = true;
+    for (let index = anyKingPosition - 9; index >= 1; index -= 9) {
+        if ((index) % 8 == 0 || isGettingChecked) {
+            break;
+        }
+        types.forEach(typeOf => {
+            const pThis = document.getElementById(typeOf + colorThis + index);
+            const pOther = document.getElementById(typeOf + colorOther + index);
+            if (pThis != null) {
+                xx1 = false;
+            }
+            if (pOther != null && (typeOf != 'queen' && typeOf != 'bishop') && xx1) {
+                xx2 = false;
+            }
+            if (pOther != null && (typeOf == 'queen' || typeOf == 'bishop') && xx1 && xx2) {
+                if (forWho == 'Black') {
+                    isGettingChecked = true;
+                    checkKingWhite = true;
+                    checkSquare = document.getElementById(kingLocation);
+                    console.log('check!');
+                    console.log(forWho + ' Makes a check');
+                } else {
+                    isGettingChecked = true;
+                    checkKingBlack = true;
+                    checkSquare = document.getElementById(kingLocation);
+                    console.log('check!');
+                    console.log(forWho + ' Makes a check');
+                }
+            }
+        });
+    }
+    if (isGettingChecked) {
+        return;
+    }
+    xx1 = true;
+    xx2 = true;
+    for (let index = parseInt(anyKingPosition) + 9; index <= 64; index += 9) {
+        if ((index - 1) % 8 == 0 || isGettingChecked) {
+            break;
+        }
+        types.forEach(typeOf => {
+            const pThis = document.getElementById(typeOf + colorThis + index);
+            const pOther = document.getElementById(typeOf + colorOther + index);
+
+            if (pThis != null) {
+                xx1 = false;
+            }
+            if (pOther != null && (typeOf != 'queen' && typeOf != 'bishop') && xx1) {
+                xx2 = false;
+            }
+            if (pOther != null && (typeOf == 'queen' || typeOf == 'bishop') && xx1 && xx2) {
+                if (forWho == 'Black') {
+                    isGettingChecked = true;
+                    checkKingWhite = true;
+                    checkSquare = document.getElementById(kingLocation);
+                    console.log('check!');
+                    console.log(forWho + ' Makes a check');
+                } else {
+                    isGettingChecked = true;
+                    checkKingBlack = true;
+                    checkSquare = document.getElementById(kingLocation);
+                    console.log('check!');
+                    console.log(forWho + ' Makes a check');
+                }
+            }
+        });
+    }
+    if (isGettingChecked) {
+        return;
+    }
+    xx1 = true;
+    xx2 = true;
+    for (let index = anyKingPosition - 7; index >= 8; index -= 7) {
+
+        if ((index - 1) % 8 == 0 || isGettingChecked) {
+            break;
+        }
+        types.forEach(typeOf => {
+            const pThis = document.getElementById(typeOf + colorThis + index);
+            const pOther = document.getElementById(typeOf + colorOther + index);
+            if (pThis != null) {
+                xx1 = false;
+            }
+            if (pOther != null && (typeOf != 'queen' && typeOf != 'bishop') && xx1) {
+                xx2 = false;
+            }
+            if (pOther != null && (typeOf == 'queen' || typeOf == 'bishop') && xx1 && xx2) {
+                if (forWho == 'Black') {
+                    isGettingChecked = true;
+                    checkKingWhite = true;
+                    checkSquare = document.getElementById(kingLocation);
+                    console.log('check!');
+                    console.log(forWho + ' Makes a check');
+                } else {
+                    isGettingChecked = true;
+                    checkKingBlack = true;
+                    checkSquare = document.getElementById(kingLocation);
+                    console.log('check!');
+                    console.log(forWho + ' Makes a check');
+                }
+            }
+        });
+    }
+    if (isGettingChecked) {
+        return;
+    }
+    xx1 = true;
+    xx2 = true;
+    for (let index = parseInt(anyKingPosition) + 7; index <= 57; index += 7) {
+        if (index % 8 == 0 || isGettingChecked) {
+            break;
+        }
+        types.forEach(typeOf => {
+            const pThis = document.getElementById(typeOf + colorThis + index);
+            const pOther = document.getElementById(typeOf + colorOther + index);
+            if (pThis != null) {
+                xx1 = false;
+            }
+            if (pOther != null && (typeOf != 'queen' && typeOf != 'bishop') && xx1) {
+                xx2 = false;
+            }
+            if (pOther != null && (typeOf == 'queen' || typeOf == 'bishop') && xx1 && xx2) {
+                if (forWho == 'Black') {
+                    isGettingChecked = true;
+                    checkKingWhite = true;
+                    checkSquare = document.getElementById(kingLocation);
+                    console.log('check!');
+                    console.log(forWho + ' Makes a check');
+                } else {
+                    isGettingChecked = true;
+                    checkKingBlack = true;
+                    checkSquare = document.getElementById(kingLocation);
+                    console.log('check!');
+                    console.log(forWho + ' Makes a check');
+                }
+            }
+        });
+    }
+}
+
+const isGettingCheckStraight = (forWho, anyKingPosition) => {
+    isGettingChecked = false;
+    let kingLocation = kingWhiteLocation;
+    checkKingWhite = false;
+    checkKingBlack = false;
+    let colorThis = 'White';
+    let colorOther = 'Black';
+    if (forWho == 'White') {
+        kingLocation = kingBlackLocation;
+        colorThis = 'Black';
+        colorOther = 'White';
+    }
+    xx1 = true;
+    xx2 = true;
+    for (let index = anyKingPosition - 8; index >= 1; index -= 8) {
+        if (isGettingChecked) {
+            break;
+        }
+        types.forEach(typeOf => {
+            const pThis = document.getElementById(typeOf + colorThis + index);
+            const pOther = document.getElementById(typeOf + colorOther + index);
+            if (pThis != null) {
+                xx1 = false;
+            }
+            if (pOther != null && (typeOf != 'queen' && typeOf != 'rock') && xx1) {
+                xx2 = false;
+            }
+            if (pOther != null && (typeOf == 'queen' || typeOf == 'rock') && xx1 && xx2) {
+                if (forWho == 'Black') {
+                    isGettingChecked = true;
+                    checkKingWhite = true;
+                    checkSquare = document.getElementById(kingLocation);
+                    console.log('check!');
+                    console.log(forWho + ' Makes a check');
+                } else {
+                    isGettingChecked = true;
+                    checkKingBlack = true;
+                    checkSquare = document.getElementById(kingLocation);
+                    console.log('check!');
+                    console.log(forWho + ' Makes a check');
+                }
+            }
+        });
+    }
+    if (isGettingChecked) {
+        return;
+    }
+    xx1 = true;
+    xx2 = true;
+    for (let index = parseInt(anyKingPosition) + 8; index <= 64; index += 8) {
+        if (isGettingChecked) {
+            break;
+        }
+        types.forEach(typeOf => {
+            const pThis = document.getElementById(typeOf + colorThis + index);
+            const pOther = document.getElementById(typeOf + colorOther + index);
+            if (pThis != null) {
+                xx1 = false;
+            }
+            if (pOther != null && (typeOf != 'queen' && typeOf != 'rock') && xx1) {
+                xx2 = false;
+            }
+            if (pOther != null && (typeOf == 'queen' || typeOf == 'rock') && xx1 && xx2) {
+                if (forWho == 'Black') {
+                    isGettingChecked = true;
+                    checkKingWhite = true;
+                    checkSquare = document.getElementById(kingLocation);
+                    console.log('check!');
+                    console.log(forWho + ' Makes a check');
+                } else {
+                    isGettingChecked = true;
+                    checkKingBlack = true;
+                    checkSquare = document.getElementById(kingLocation);
+                    console.log('check!');
+                    console.log(forWho + ' Makes a check');
+                }
+            }
+        });
+    }
+    if (isGettingChecked) {
+        return;
+    }
+    xx1 = true;
+    xx2 = true;
+    for (let index = anyKingPosition - 1; index >= 8; index -= 1) {
+        if (index % 8 == 0 || isGettingChecked) {
+            break;
+        }
+        types.forEach(typeOf => {
+            const pThis = document.getElementById(typeOf + colorThis + index);
+            const pOther = document.getElementById(typeOf + colorOther + index);
+            if (pThis != null) {
+                xx1 = false;
+            }
+            if (pOther != null && (typeOf != 'queen' && typeOf != 'rock') && xx1) {
+                xx2 = false;
+            }
+            if (pOther != null && (typeOf == 'queen' || typeOf == 'rock') && xx1 && xx2) {
+                if (forWho == 'Black') {
+                    isGettingChecked = true;
+                    checkKingWhite = true;
+                    checkSquare = document.getElementById(kingLocation);
+                    console.log('check!');
+                    console.log(forWho + ' Makes a check');
+                } else {
+                    isGettingChecked = true;
+                    checkKingBlack = true;
+                    checkSquare = document.getElementById(kingLocation);
+                    console.log('check!');
+                    console.log(forWho + ' Makes a check');
+                }
+            }
+        });
+    }
+    if (isGettingChecked) {
+        return;
+    }
+    xx1 = true;
+    xx2 = true;
+    for (let index = parseInt(anyKingPosition) + 1; index <= 57; index += 1) {
+
+        if ((index - 1) % 8 == 0 || isGettingChecked) {
+            break;
+        }
+        types.forEach(typeOf => {
+            const pThis = document.getElementById(typeOf + colorThis + index);
+            const pOther = document.getElementById(typeOf + colorOther + index);
+            if (pThis != null) {
+                xx1 = false;
+            }
+            if (pOther != null && (typeOf != 'queen' && typeOf != 'rock') && xx1) {
+                xx2 = false;
+            }
+            if (pOther != null && (typeOf == 'queen' || typeOf == 'rock') && xx1 && xx2) {
+                if (forWho == 'Black') {
+                    isGettingChecked = true;
+                    checkKingWhite = true;
+                    checkSquare = document.getElementById(kingLocation);
+                    console.log('check!');
+                    console.log(forWho + ' Makes a check');
+                } else {
+                    isGettingChecked = true;
+                    checkKingBlack = true;
+                    checkSquare = document.getElementById(kingLocation);
+                    console.log('check!');
+                    console.log(forWho + ' Makes a check');
+                }
+            }
+        });
+    }
+}
+
+const isGettingCheckKnight = (forWho, anyKingPosition) => {
+    isGettingChecked = false;
+    let kingLocation = kingWhiteLocation;
+    checkKingWhite = false;
+    checkKingBlack = false;
+    let colorOther = 'Black';
+    if (forWho == 'White') {
+        kingLocation = kingBlackLocation
+        colorOther = 'White';
+    }
+    xx1 = false;
+    xx2 = false;
+
+    if ((anyKingPosition - 1) % 8 == 0) {
+        const pOthers = [
+            document.getElementById('knight' + colorOther + (anyKingPosition - 15)),
+            document.getElementById('knight' + colorOther + (anyKingPosition - 6)),
+            document.getElementById('knight' + colorOther + (parseInt(anyKingPosition) + 17)),
+            document.getElementById('knight' + colorOther + (parseInt(anyKingPosition) + 10)),
+        ]
+        for (let index = 0; index < 4; index++) {
+            if (pOthers[index] != null) {
+                xx1 = true;
+                xx2 = true;
+            }
+        }
+    } else if ((anyKingPosition - 1) % 8 == 0) {
+        const pOthers = [document.getElementById('knight' + colorOther + (anyKingPosition - 17)),
+            document.getElementById('knight' + colorOther + (anyKingPosition - 15)),
+            document.getElementById('knight' + colorOther + (anyKingPosition - 6)),
+            document.getElementById('knight' + colorOther + (parseInt(anyKingPosition) + 17)),
+            document.getElementById('knight' + colorOther + (parseInt(anyKingPosition) + 15)),
+            document.getElementById('knight' + colorOther + (parseInt(anyKingPosition) + 10)),
+        ]
+        for (let index = 0; index < 6; index++) {
+            if (pOthers[index] != null) {
+                xx1 = true;
+                xx2 = true;
+            }
+        }
+    } else if (anyKingPosition % 8 == 0) {
+        const pOthers = [document.getElementById('knight' + colorOther + (anyKingPosition - 17)),
+            document.getElementById('knight' + colorOther + (anyKingPosition - 10)),
+            document.getElementById('knight' + colorOther + (parseInt(anyKingPosition) + 15)),
+            document.getElementById('knight' + colorOther + (parseInt(anyKingPosition) + 6))
+        ]
+        for (let index = 0; index < 4; index++) {
+            if (pOthers[index] != null) {
+                xx1 = true;
+                xx2 = true;
+            }
+        }
+    } else if ((parseInt(anyKingPosition) + 1) % 8 == 0) {
+        const pOthers = [document.getElementById('knight' + colorOther + (anyKingPosition - 17)),
+            document.getElementById('knight' + colorOther + (anyKingPosition - 15)),
+            document.getElementById('knight' + colorOther + (anyKingPosition - 10)),
+            document.getElementById('knight' + colorOther + (parseInt(anyKingPosition) + 17)),
+            document.getElementById('knight' + colorOther + (parseInt(anyKingPosition) + 15)),
+            document.getElementById('knight' + colorOther + (parseInt(anyKingPosition) + 6))
+        ]
+        for (let index = 0; index < 6; index++) {
+            if (pOthers[index] != null) {
+                xx1 = true;
+                xx2 = true;
+            }
+        }
+    } else {
+        const pOthers = [document.getElementById('knight' + colorOther + (anyKingPosition - 17)),
+            document.getElementById('knight' + colorOther + (anyKingPosition - 15)),
+            document.getElementById('knight' + colorOther + (anyKingPosition - 10)),
+            document.getElementById('knight' + colorOther + (anyKingPosition - 6)),
+            document.getElementById('knight' + colorOther + (parseInt(anyKingPosition) + 17)),
+            document.getElementById('knight' + colorOther + (parseInt(anyKingPosition) + 15)),
+            document.getElementById('knight' + colorOther + (parseInt(anyKingPosition) + 10)),
+            document.getElementById('knight' + colorOther + (parseInt(anyKingPosition) + 6))
+        ]
+        for (let index = 0; index < 8; index++) {
+            if (pOthers[index] != null) {
+                xx1 = true;
+                xx2 = true;
+            }
+        }
+    }
+    if (xx1 && xx2) {
+        if (forWho == 'Black') {
+            isGettingChecked = true;
+            checkKingWhite = true;
+            checkSquare = document.getElementById(kingLocation);
+            console.log('check!');
+            console.log(forWho + ' Makes a check');
+        } else {
+            isGettingChecked = true;
+            checkKingBlack = true;
+            checkSquare = document.getElementById(kingLocation);
+            console.log('check!');
+            console.log(forWho + ' Makes a check');
+        }
+    }
+}
+
+const isGettingCheckPawn = (forWho, anyKingPosition) => {
+    xx1 = false;
+    xx2 = false;
+    isGettingChecked = false;
+    let kingLocation = kingWhiteLocation;
+    checkKingWhite = false;
+    checkKingBlack = false;
+    let colorOther = 'Black';
+    if (forWho == 'White') {
+        kingLocation = kingBlackLocation
+        colorOther = 'White';
+        const pawn1 = document.getElementById('pawn' + colorOther + (parseInt(anyKingPosition) + 9));
+        const pawn2 = document.getElementById('pawn' + colorOther + (parseInt(anyKingPosition) + 7));
+        if (pawn1 != null || pawn2 != null) {
+            isGettingChecked = true;
+            checkKingBlack = true;
+            checkSquare = document.getElementById(kingLocation);
+            console.log('check!');
+            console.log(forWho + ' Makes a check');
+        }
+    }else{
+        const pawn1 = document.getElementById('pawn' + colorOther + (anyKingPosition -9));
+        const pawn2 = document.getElementById('pawn' + colorOther + (anyKingPosition - 7));
+        if (pawn1 != null || pawn2 != null) {
+            isGettingChecked = true;
+            checkKingBlack = true;
+            checkSquare = document.getElementById(kingLocation);
+            console.log('check!');
+            console.log(forWho + ' Makes a check');
+        }
+    }
+
+
+
+}
+
+const isCheck = (whoIsChecking, currentKingPosition) => {
+    isGettingCheckDiagonally(whoIsChecking, currentKingPosition);
+    if (isGettingChecked) {
+        return true;
+    }
+    isGettingCheckStraight(whoIsChecking, currentKingPosition);
+    if (isGettingChecked) {
+        return true;
+    }
+    isGettingCheckKnight(whoIsChecking, currentKingPosition);
+    if (isGettingChecked) {
+        return true;
+    }
+    isGettingCheckPawn(whoIsChecking, currentKingPosition);
+    if (isGettingChecked) {
+        return true;
+    }
+    return false;
 }
